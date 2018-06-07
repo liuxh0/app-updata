@@ -1,0 +1,15 @@
+{
+  "name": "updatajs",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "tslint": "tslint -p tsconfig.json"
+  },
+  "author": "Xinhu Liu",
+  "devDependencies": {
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1"
+  }
+}
