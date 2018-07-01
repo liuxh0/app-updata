@@ -1,28 +1,24 @@
-import { UpdatePlan } from './update-plan';
+import { IConfiguredUpdatePlan, UpdatePlan } from './update-plan';
 import { VersionUpdater } from './version-updater';
 
-type UpdateFunction = () => any;
-
-interface INextVersionConfigurator {
+export interface IUpdataConfigurator {
   /**
    * Configures a next version.
-   * @param version ID of the version.
-   * @param operation Operation to update from the previous version to this version.
+   * @param version Identifier of the version.
+   * @param updateFunction Operation to update from the previous version to this version.
    * @returns Interface for further configuration.
    * @throws {Error} if the version is not valid.
    */
-  next(version: string, operation?: UpdateFunction): IUpdataConfigurator;
-}
+  next(version: string, updateFunction?: () => any): IUpdataConfigurator;
 
-interface IUpdataConfigurator extends INextVersionConfigurator {
   /**
    * Configures a shortcut update from a earlier version to this version.
-   * @param version A earlier but not the previous version.
-   * @param operation Operation to update from the earlier version to this version.
+   * @param version Identifier of a earlier version.
+   * @param updateFunction Operation to update from the earlier version to this version.
    * @returns Interface for further configuration.
    * @throws {Error} if the version is not valid.
    */
-  shortcutFrom(version: string, operation: UpdateFunction): IUpdataConfigurator;
+  shortcutFrom(version: string, updateFunction: () => any): IUpdataConfigurator;
 
   /**
    * Marks configuration done.
@@ -31,17 +27,23 @@ interface IUpdataConfigurator extends INextVersionConfigurator {
   done(): IConfiguredUpdata;
 }
 
-interface IConfiguredUpdata {
-  getUpdatePlan(from: string, to: string): UpdatePlan;
+export interface IConfiguredUpdata {
+  /**
+   * Returns an update plan according to configuration.
+   * @param from Version that is updated from.
+   * @param to Version that is updated to.
+   * @throws {Error} if no update can be made between two versions.
+   */
+  getUpdatePlan(from: string, to: string): IConfiguredUpdatePlan;
 }
 
 export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   /**
    * Creates an Updata instance.
    * @param version The first version that can be updated from.
-   * @returns Interface for configuration of a next version.
+   * @returns Interface for configuration.
    */
-  static startWith(version: string): INextVersionConfigurator {
+  static startWith(version: string): IUpdataConfigurator {
     return new Updata(version);
   }
 
@@ -52,23 +54,23 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   }
 
   /** @implements {IUpdataConfigurator} */
-  next(version: string, operation?: UpdateFunction): IUpdataConfigurator {
+  next(version: string, updateFunction?: () => any): IUpdataConfigurator {
     if (this.versionUpdaters.has(version)) {
-      throw new Error(`Version ${version} already exists`);
+      throw new Error(`Version ${version} was already configured.`);
     }
 
     const previousVersion = this.getLastVersionUpdater().targetVersion;
     const nextVersionUpdater = new VersionUpdater(version);
-    nextVersionUpdater.registerUpdateOperationFromVersion(previousVersion, operation || (() => {}));
+    nextVersionUpdater.registerUpdateFunctionFromVersion(previousVersion, updateFunction || (() => {}));
     this.versionUpdaters.set(version, nextVersionUpdater);
 
     return this;
   }
 
   /** @implements {IUpdataConfigurator} */
-  shortcutFrom(version: string, operation: UpdateFunction): IUpdataConfigurator {
+  shortcutFrom(version: string, updateFunction: () => any): IUpdataConfigurator {
     const versionUpdater = this.getLastVersionUpdater();
-    versionUpdater.registerUpdateOperationFromVersion(version, operation);
+    versionUpdater.registerUpdateFunctionFromVersion(version, updateFunction);
     return this;
   }
 
@@ -78,9 +80,53 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   }
 
   /** @implements {IConfiguredUpdata} */
-  getUpdatePlan(from: string, to: string): UpdatePlan {
-    // TODO
-    return new UpdatePlan();
+  getUpdatePlan(from: string, to: string): IConfiguredUpdatePlan {
+    if (this.versionUpdaters.has(from) === false) {
+      throw new Error(`Version ${from} was not configured.`);
+    }
+
+    if (this.versionUpdaters.has(to) === false) {
+      throw new Error(`Version ${to} was not configured.`);
+    }
+
+    const versions = Array.from(this.versionUpdaters.keys());
+    if (versions.indexOf(from) >= versions.indexOf(to)) {
+      throw new Error(`Target version is prior to origin version.`);
+    }
+
+    // Parameters are fine. Let's find a update plan now.
+    const updateSteps: Array<{
+      fromVersion: string,
+      toVersion: string,
+      updateFunction: () => any
+    }> = new Array();
+
+    while (true) {
+      const targetVersion = updateSteps.length ? to : updateSteps[updateSteps.length - 1].fromVersion;
+      if (targetVersion === from) {
+        break;
+      }
+
+      const versionUpdater = this.versionUpdaters.get(targetVersion)!;
+      const allUpdatableVersions = versionUpdater.getUpdatableVersions();
+      const validUpdatableVersions = allUpdatableVersions
+        .filter(v => versions.indexOf(v) >= versions.indexOf(from))
+        .sort((a, b) => versions.indexOf(a) - versions.indexOf(b));
+      const earliestUpdatableVersion = validUpdatableVersions[0];
+
+      updateSteps.unshift({
+        fromVersion: earliestUpdatableVersion,
+        toVersion: targetVersion,
+        updateFunction: versionUpdater.getUpdateFunctionFromVersion(earliestUpdatableVersion)
+      });
+    }
+
+    const updatePlanConfigurator = UpdatePlan.configure(from);
+    updateSteps.forEach(step => {
+      updatePlanConfigurator.addNextVersion(step.toVersion, step.updateFunction);
+    });
+
+    return updatePlanConfigurator.done();
   }
 
   private getLastVersionUpdater(): VersionUpdater {

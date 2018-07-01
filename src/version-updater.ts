@@ -4,59 +4,56 @@ export class VersionUpdater {
    */
   readonly targetVersion: string;
 
-  private updateOperations: Map<string, () => any>;
+  private updateFunctions: Map<string, () => any>;
 
   /**
    * @param version The version that is updated to.
    */
   constructor(version: string) {
     this.targetVersion = version;
-    this.updateOperations = new Map();
+    this.updateFunctions = new Map();
   }
 
   /**
-   * Adds an update operation from a version to the target version.
+   * Adds an update function.
    * @param version Version that is updated from.
-   * @param updateOperation Operation to update from the version to the target version.
+   * @param updateFunction Operation to update from the version to the target version.
    * @throws {Error} if the version is not valid.
    */
-  registerUpdateOperationFromVersion(version: string, updateOperation: () => any): void {
-    if (this.updateOperations.has(version)) {
-      throw new Error(`Update operation from version ${version} to the target version already exists.`);
+  registerUpdateFunctionFromVersion(version: string, updateFunction: () => any): void {
+    if (this.updateFunctions.has(version)) {
+      throw new Error(`Update function from version ${version} to the target version was already registered.`);
     }
 
-    this.updateOperations.set(version, updateOperation);
+    this.updateFunctions.set(version, updateFunction);
   }
 
   /**
    * Returns all version that can be updated from.
    */
   getUpdatableVersions(): string[] {
-    return Array.from(this.updateOperations.keys());
+    return Array.from(this.updateFunctions.keys());
   }
 
   /**
-   * Returns if the update operation is registered.
+   * Returns if the update function is registered.
    * @param version Version that is updated from.
    */
   updatableFromVersion(version: string): boolean {
-    return this.updateOperations.has(version);
+    return this.updateFunctions.has(version);
   }
 
   /**
-   * Performs an update.
+   * Returns the update function.
    * @param version Version that is updated from.
    * @throws {Error} if the version is not registered before.
    */
-  performUpdateOperationFromVersion(version: string): Promise<void> {
-    const operation = this.updateOperations.get(version);
-    if (operation === undefined) {
-      throw new Error(`Update operation from version ${version} to the target version does not exist.`);
+  getUpdateFunctionFromVersion(version: string): () => any {
+    const updateFunction = this.updateFunctions.get(version);
+    if (updateFunction === undefined) {
+      throw new Error(`Update function from version ${version} to the target version was not registered.`);
     }
 
-    return new Promise(async resolve => {
-      await operation();
-      resolve();
-    });
+    return updateFunction;
   }
 }
