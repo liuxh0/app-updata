@@ -21,6 +21,10 @@ export class VersionUpdater {
    * @throws {Error} if the version is not valid.
    */
   registerUpdateFunctionFromVersion(version: string, updateFunction: () => any): void {
+    if (version === this.targetVersion) {
+      throw new Error('Cannot register update function from target version.');
+    }
+
     if (this.updateFunctions.has(version)) {
       throw new Error(`Update function from version ${version} to the target version was already registered.`);
     }

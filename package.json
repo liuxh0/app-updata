@@ -4,11 +4,14 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "test": "rm -rf spec-build/ && tsc -p tsconfig.spec.json && jasmine --config=jasmine.json",
+    "build": "rm -rf dist && tsc -p tsconfig.dist.json",
     "tslint": "tslint -p tsconfig.json"
   },
   "author": "Xinhu Liu",
   "devDependencies": {
+    "@types/jasmine": "^2.8.8",
+    "jasmine": "^3.1.0",
     "tslint": "^5.10.0",
     "typescript": "^2.9.1"
   }
