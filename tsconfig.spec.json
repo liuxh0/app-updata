@@ -4,6 +4,8 @@
     "src/**/*.spec.ts"
   ],
   "compilerOptions": {
-    "outDir": "spec-build/"
+    "outDir": "spec-build/",
+    "sourceMap": false,
+    "declaration": false
   }
 }

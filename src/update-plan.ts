@@ -23,15 +23,23 @@ export class UpdatePlan implements IUpdatePlanConfigurator, IConfiguredUpdatePl
 
   private fromVersion: string;
   private nextVersions: Array<[string, () => any]>;
+  private configurationDone: boolean;
 
   private constructor(fromVersion: string) {
     this.fromVersion = fromVersion;
     this.nextVersions = new Array();
+    this.configurationDone = false;
   }
 
   /** @implements {IUpdatePlanConfigurator} */
   addNextVersion(version: string, updateFunction: () => any): void {
-    if (this.nextVersions.some(value => value[0] === version)) {
+    if (this.configurationDone) {
+      throw new Error('Configuration is already done.');
+    }
+
+    if (version === this.fromVersion) {
+      throw new Error('Cannot add from-version.');
+    } else if (this.nextVersions.some(value => value[0] === version)) {
       throw new Error('Version is already added.');
     }
 
@@ -40,6 +48,7 @@ export class UpdatePlan implements IUpdatePlanConfigurator, IConfiguredUpdatePl
 
   /** @implements {IUpdatePlanConfigurator} */
   done(): IConfiguredUpdatePlan {
+    this.configurationDone = true;
     return this;
   }
 
