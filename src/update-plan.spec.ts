@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+import sinon from 'sinon';
 import { UpdatePlan } from './update-plan';
 
 const noop = () => { };
@@ -6,7 +8,7 @@ describe('UpdatePlan', () => {
   describe('configure()', () => {
     it('should return a new instance', () => {
       const configurator = UpdatePlan.configure('');
-      expect(configurator instanceof UpdatePlan).toBeTruthy();
+      expect(configurator).to.be.an.instanceof(UpdatePlan);
     });
   });
 
@@ -17,13 +19,13 @@ describe('UpdatePlan', () => {
 
       expect(() => {
         configurator.addNextVersion('0', noop);
-      }).toThrowError();
+      }).to.throw();
       expect(() => {
         configurator.addNextVersion('1', noop);
-      }).toThrowError();
+      }).to.throw();
       expect(() => {
         configurator.addNextVersion('2', noop);
-      }).not.toThrowError();
+      }).to.not.throw();
     });
 
     it('should throw error if called after done()', () => {
@@ -31,7 +33,7 @@ describe('UpdatePlan', () => {
       expect(() => {
         configurator.done();
         configurator.addNextVersion('1', noop);
-      }).toThrowError();
+      }).to.throw();
     });
   });
 
@@ -39,14 +41,14 @@ describe('UpdatePlan', () => {
     it('should return the same instance', () => {
       const configurator = UpdatePlan.configure('0');
       const configured = configurator.done();
-      expect(configured).toBe(configurator as any);
+      expect(configured).to.equal(configurator);
     });
   });
 
   describe('getUpdatePath()', () => {
     it('should return array if no versions added', () => {
       const configured = UpdatePlan.configure('0').done();
-      expect(configured.getUpdatePath()).toEqual(['0']);
+      expect(configured.getUpdatePath()).to.eql(['0']);
     });
 
     it('should return array including from-version and added versions in order', () => {
@@ -58,33 +60,32 @@ describe('UpdatePlan', () => {
       const configured = configurator.done();
 
       const updatePath = configured.getUpdatePath();
-      expect(updatePath).toEqual([fromVersion, ...versions]);
+      expect(updatePath).to.eql([fromVersion, ...versions]);
     });
   });
 
   describe('execute()', () => {
     it('should call update functions in order and await', async () => {
-      const versions: Array<[string, () => any]> = [
-        ['1', jasmine.createSpy()],
-        ['2', jasmine.createSpy()]
-      ];
-      const functionCalls: string[] = [];
+      const versions: string[] = ['1', '2'];
+      const expectedCalls: sinon.SinonSpy[] = [];
 
       const configurator = UpdatePlan.configure('');
-      for (const [version, updateFunction] of versions) {
-        configurator.addNextVersion(version, updateFunction);
-        (updateFunction as jasmine.Spy).and.returnValue(new Promise(resolve => {
-          setImmediate(() => {
-            functionCalls.push(version);
-            resolve();
+      versions.forEach(version => {
+        const resolveSpy = sinon.fake((resolve: () => any) => resolve());
+        const updateFunctionSpy = sinon.fake(() => {
+          return new Promise(resolve => {
+            setImmediate(() => resolveSpy(resolve));
           });
-        }));
-      }
+        });
+
+        configurator.addNextVersion(version, updateFunctionSpy);
+        expectedCalls.push(updateFunctionSpy, resolveSpy);
+      });
 
       const configured = configurator.done();
       await configured.execute();
 
-      expect(functionCalls).toEqual(versions.map(([version]) => version));
+      sinon.assert.callOrder(...expectedCalls);
     });
   });
 });
