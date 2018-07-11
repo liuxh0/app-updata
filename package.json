@@ -27,10 +27,10 @@
       ".ts"
     ],
     "include": [
-      "src/**/*.ts",
-      "src/updata.ts"
+      "src/**/*.ts"
     ],
     "exclude": [
+      "**/*.d.ts",
       "src/**/*.spec.ts",
       "src/index.ts"
     ],
