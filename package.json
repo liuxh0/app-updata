@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "nyc mocha --opts mocha.opts",
+    "test": "nyc mocha --opts mocha.opts && nyc report --reporter=text-lcov > coverage/coverage.lcov",
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "tslint": "tslint -p tsconfig.json"
   },
@@ -36,8 +36,7 @@
     ],
     "reporter": [
       "text",
-      "html",
-      "json"
+      "html"
     ],
     "all": true
   }
