@@ -31,8 +31,7 @@
     ],
     "exclude": [
       "**/*.d.ts",
-      "src/**/*.spec.ts",
-      "src/index.ts"
+      "src/**/*.spec.ts"
     ],
     "require": [
       "ts-node/register"

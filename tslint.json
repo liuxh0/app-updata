@@ -13,7 +13,8 @@
     "no-empty": false,
     "no-empty-interface": false,
     "quotemark": [true, "single"],
-    "trailing-comma": false
+    "trailing-comma": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"]
   },
   "rulesDirectory": []
 }

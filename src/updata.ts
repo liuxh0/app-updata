@@ -48,20 +48,26 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   }
 
   private versionUpdaters: Map<string, VersionUpdater>;
+  private configurationDone: boolean;
 
   private constructor(firstVersion: string) {
     this.versionUpdaters = new Map([[firstVersion, new VersionUpdater(firstVersion)]]);
+    this.configurationDone = false;
   }
 
   /** @implements {IUpdataConfigurator} */
   next(version: string, updateFunction?: () => any): IUpdataConfigurator {
+    if (this.configurationDone) {
+      throw new Error('Configuration is already done.');
+    }
+
     if (this.versionUpdaters.has(version)) {
       throw new Error(`Version ${version} was already configured.`);
     }
 
     const previousVersion = this.getLastVersionUpdater().targetVersion;
     const nextVersionUpdater = new VersionUpdater(version);
-    nextVersionUpdater.registerUpdateFunctionFromVersion(previousVersion, updateFunction || (() => {}));
+    nextVersionUpdater.registerUpdateFunctionFromVersion(previousVersion, updateFunction || (() => undefined));
     this.versionUpdaters.set(version, nextVersionUpdater);
 
     return this;
@@ -69,6 +75,14 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
 
   /** @implements {IUpdataConfigurator} */
   shortcutFrom(version: string, updateFunction: () => any): IUpdataConfigurator {
+    if (this.configurationDone) {
+      throw new Error('Configuration is already done.');
+    }
+
+    if (this.versionUpdaters.has(version) === false) {
+      throw new Error(`Version ${version} was not configured.`);
+    }
+
     const versionUpdater = this.getLastVersionUpdater();
     versionUpdater.registerUpdateFunctionFromVersion(version, updateFunction);
     return this;
@@ -76,6 +90,7 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
 
   /** @implements {IUpdataConfigurator} */
   done(): IConfiguredUpdata {
+    this.configurationDone = true;
     return this;
   }
 
@@ -102,7 +117,7 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
     }> = new Array();
 
     while (true) {
-      const targetVersion = updateSteps.length ? to : updateSteps[updateSteps.length - 1].fromVersion;
+      const targetVersion = updateSteps.length ? updateSteps[0].fromVersion : to;
       if (targetVersion === from) {
         break;
       }
