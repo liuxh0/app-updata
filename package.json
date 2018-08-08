@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "nyc mocha src/**/*.spec.ts && nyc report --reporter=text-lcov > coverage/coverage.lcov",
-    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "test": "nyc mocha src/*.spec.ts src/**/*.spec.ts && nyc report --reporter=text-lcov > coverage/coverage.lcov",
+    "build": "rm -rf dist && tsc -p tsconfig.dist.json",
     "tslint": "tslint -p tsconfig.json"
   },
   "author": "Xinhu Liu",
@@ -31,7 +31,8 @@
     ],
     "exclude": [
       "**/*.d.ts",
-      "src/**/*.spec.ts"
+      "src/**/*.spec.ts",
+      "src/index.ts"
     ],
     "require": [
       "ts-node/register"
