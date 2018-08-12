@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon, { SinonSpy } from 'sinon';
 import { Updata } from './updata';
-import { IUpdatePlanConfigurator, UpdatePlan } from './update-plan';
+import { UpdatePlan } from './update-plan';
 
 const noop = () => { };
 
@@ -128,11 +128,10 @@ describe('Updata', () => {
     });
 
     it('should create UpdatePlan correctly and return it', () => {
-      const originalConfigure = UpdatePlan.configure;
-      const configureSpy = sinonSandbox.stub(UpdatePlan, 'configure').callsFake((...args) => {
-        const returnValue = originalConfigure.call(undefined, args);
+      const constructor = UpdatePlan.construct;
+      const configureSpy = sinonSandbox.stub(UpdatePlan, 'construct').callsFake((...args) => {
+        const returnValue = constructor.call(undefined, args);
         sinonSandbox.spy(returnValue, 'addNextVersion');
-        sinonSandbox.spy(returnValue, 'done');
         return returnValue;
       });
 
@@ -149,15 +148,12 @@ describe('Updata', () => {
       updata.getUpdatePlan('0', '5');
       expect(configureSpy.calledOnceWith('0')).to.equal(true);
 
-      const configurator = configureSpy.returnValues[0] as IUpdatePlanConfigurator;
-      const addNextVersionSpy = configurator.addNextVersion as SinonSpy;
+      const updatePlan = configureSpy.returnValues[0] as UpdatePlan;
+      const addNextVersionSpy = updatePlan.addNextVersion as SinonSpy;
       expect(addNextVersionSpy.calledThrice).to.equal(true);
       expect(addNextVersionSpy.getCall(0).calledWith('3')).to.equal(true);
       expect(addNextVersionSpy.getCall(1).calledWith('4')).to.equal(true);
       expect(addNextVersionSpy.getCall(2).calledWith('5')).to.equal(true);
-
-      const doneSpy = configurator.done as SinonSpy;
-      expect(doneSpy.calledAfter(addNextVersionSpy)).to.equal(true);
     });
   });
 });

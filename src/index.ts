@@ -5,5 +5,5 @@ export {
 } from './updata';
 
 export {
-  IConfiguredUpdatePlan
+  UpdatePlan
 } from './update-plan';

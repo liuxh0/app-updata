@@ -1,12 +1,12 @@
-import { IConfiguredUpdatePlan, UpdatePlan } from './update-plan';
+import { UpdatePlan } from './update-plan';
 import { VersionUpdater } from './version-updater';
 
 export interface IUpdataConfigurator {
   /**
    * Configures a next version.
-   * @param version Identifier of the version.
-   * @param updateFunction Operation to update from the previous version to this version.
-   * @returns Interface for further configuration.
+   * @param version Identifier of the version
+   * @param updateFunction Operation to update from the previous version to this version
+   * @returns Interface for further configuration
    * @throws {Error} if the version is not valid.
    */
   next(version: string, updateFunction?: () => any): IUpdataConfigurator;
@@ -34,7 +34,7 @@ export interface IConfiguredUpdata {
    * @param to Version that is updated to.
    * @throws {Error} if no update can be made between two versions.
    */
-  getUpdatePlan(from: string, to: string): IConfiguredUpdatePlan;
+  getUpdatePlan(from: string, to: string): UpdatePlan;
 }
 
 export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
@@ -95,7 +95,7 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   }
 
   /** @implements {IConfiguredUpdata} */
-  getUpdatePlan(from: string, to: string): IConfiguredUpdatePlan {
+  getUpdatePlan(from: string, to: string): UpdatePlan {
     if (this.versionUpdaters.has(from) === false) {
       throw new Error(`Version ${from} was not configured.`);
     }
@@ -136,12 +136,12 @@ export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
       });
     }
 
-    const updatePlanConfigurator = UpdatePlan.configure(from);
+    const updatePlan = UpdatePlan.construct(from);
     updateSteps.forEach(step => {
-      updatePlanConfigurator.addNextVersion(step.toVersion, step.updateFunction);
+      updatePlan.addNextVersion(step.toVersion, step.updateFunction);
     });
 
-    return updatePlanConfigurator.done();
+    return updatePlan;
   }
 
   private getLastVersionUpdater(): VersionUpdater {

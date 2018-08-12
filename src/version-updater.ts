@@ -1,3 +1,6 @@
+/**
+ * @internal
+ */
 export class VersionUpdater {
   /**
    * The version that is updated to.
