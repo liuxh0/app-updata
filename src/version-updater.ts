@@ -43,7 +43,7 @@ export class VersionUpdater {
   }
 
   /**
-   * Returns if the update function is registered.
+   * Returns if an update function is registered.
    * @param version Version that is updated from.
    */
   updatableFromVersion(version: string): boolean {

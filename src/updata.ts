@@ -4,16 +4,16 @@ import { VersionUpdater } from './version-updater';
 export interface IUpdataConfigurator {
   /**
    * Configures a next version.
-   * @param version Identifier of the version
-   * @param updateFunction Operation to update from the previous version to this version
-   * @returns Interface for further configuration
+   * @param version Next version.
+   * @param updateFunction Operation to update from the previous version to this version.
+   * @returns Interface for further configuration.
    * @throws {Error} if the version is not valid.
    */
   next(version: string, updateFunction?: () => any): IUpdataConfigurator;
 
   /**
    * Configures a shortcut update from a earlier version to this version.
-   * @param version Identifier of a earlier version.
+   * @param version A earlier version.
    * @param updateFunction Operation to update from the earlier version to this version.
    * @returns Interface for further configuration.
    * @throws {Error} if the version is not valid.
@@ -29,7 +29,7 @@ export interface IUpdataConfigurator {
 
 export interface IConfiguredUpdata {
   /**
-   * Returns an update plan according to configuration.
+   * Returns an update plan.
    * @param from Version that is updated from.
    * @param to Version that is updated to.
    * @throws {Error} if no update can be made between two versions.
@@ -39,7 +39,7 @@ export interface IConfiguredUpdata {
 
 export class Updata implements IUpdataConfigurator, IConfiguredUpdata {
   /**
-   * Creates an Updata instance.
+   * Starts configuration.
    * @param version The first version that can be updated from.
    * @returns Interface for configuration.
    */
