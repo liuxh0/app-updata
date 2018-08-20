@@ -7,7 +7,7 @@
 
 ### *Disclaimer*
 
-This project is currently under active development and at a very early stage. There is only very basic implementation to demonstrate the idea. Codes are not tested and API may change at any time before an official release. Therefore use at your own risk!
+This project is currently under active development and at a very early stage. API may change at any time before release v1.0.0.
 
 <!-- TODO -->
 <!-- # Why do I need this? -->
@@ -47,9 +47,3 @@ const updatePath = updatePlan.getUpdatePath();
 await updatePlan.execute();
 // Now it is up-to-date ✌️
 ```
-
-## What's Next?
-
-After adding essential unit tests, I will release a MVP version.
-
-Great ideas and contribution are welcome!!!
