@@ -1,23 +1,30 @@
 # Updata
 
-[![Build Status](https://travis-ci.com/liuxh0/updatajs.svg?branch=develop)](https://travis-ci.com/liuxh0/updatajs)
-[![codecov](https://codecov.io/gh/liuxh0/updatajs/branch/develop/graph/badge.svg)](https://codecov.io/gh/liuxh0/updatajs)
+[![Build Status](https://travis-ci.com/liuxh0/app-updata.svg?branch=develop)](https://travis-ci.com/liuxh0/app-updata)
+[![codecov](https://codecov.io/gh/liuxh0/app-updata/branch/develop/graph/badge.svg)](https://codecov.io/gh/liuxh0/app-updata)
+
+[![NPM](https://nodei.co/npm/app-updata.png?compact=true)](https://nodei.co/npm/app-updata/)
 
 **Updata** is a JavaScript library that makes it easier to migrate local data from old versions. With the help of Updata, you don't have to care about how your app's local storage looked like a year ago; nor do you need to write thousands of `if`s to deal with data created by different versions. All you need to do is to tell Updata what has been changed compared to the previous version. Then Updata does all its best to migrate local data from any previous versions to the latest version. No more chaos, focus more on your work. 👨‍💻
 
 ### *Disclaimer*
 
-This project is currently under active development and at a very early stage. API may change at any time before release v1.0.0.
+This project is currently under active development, therefore API may change in following `0.x.x` versions.
 
 <!-- TODO -->
 <!-- # Why do I need this? -->
 
 ## Quick Start
 
+Install from npm:
+
+```
+npm install app-updata
+```
 To benefit from Updata, there are two steps: *configure* and *update*.
 
 ```typescript
-import { Updata } from 'updata';
+import { Updata } from 'app-updata';
 
 // Step 1: Configure
 const updata = Updata
