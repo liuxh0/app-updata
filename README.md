@@ -17,10 +17,20 @@ This project is currently under active development, therefore API may change in 
 ## Quick Start
 
 Install from npm:
-
 ```
 npm install app-updata
 ```
+
+Or use the bundle and access everything via `AppUpdata`:
+```html
+<script src="node_modules/app-updata/bundle/app-updata.js"></script>
+<script src="node_modules/app-updata/bundle/app-updata.min.js"></script>
+<script>
+  const updata = AppUpdata.Updata.startWith('1.0');
+  // ...
+</script>
+```
+
 To benefit from Updata, there are two steps: *configure* and *update*.
 
 ```typescript
